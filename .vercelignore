@@ -1,0 +1,14 @@
+.git/
+.venv/
+.vercel/
+.impeccable/
+.agents/
+.codex/
+.aws/
+tests/
+**/__pycache__/
+**/*.pyc
+.env
+.env.*
+*.md
+LICENSE

@@ -1,0 +1,269 @@
+{% if request.path == '/editor' %}
+<section id="editorView" class="editor page-width" aria-labelledby="editorTitle">
+{% else %}
+<section id="editorView" class="editor page-width" aria-labelledby="editorTitle" hidden>
+{% endif %}
+  <div class="editor-heading">
+    <h1 id="editorTitle" tabindex="-1">Ruang kerja gambar</h1>
+    <button class="button secondary" type="button" data-upload>
+      Ganti gambar
+    </button>
+  </div>
+  <div class="workspace">
+    <section class="preview-panel drop-zone" aria-labelledby="previewTitle">
+      <div class="panel-heading">
+        <h2 id="previewTitle">Preview gambar</h2>
+        <span id="previewKind" class="tag neutral">Asli</span>
+      </div>
+      <div id="previewStage" class="preview-stage">
+        <div id="emptyPreview" class="empty-preview">
+          <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+            <rect x="5" y="7" width="38" height="34" rx="4" />
+            <circle cx="17" cy="18" r="4" />
+            <path d="m6 35 12-11 9 8 7-6 9 9" />
+          </svg>
+          <h3>Gambarmu mulai di sini</h3>
+          <p>
+            Pilih atau tarik gambar untuk membuka preview dan analisis otomatis.
+          </p>
+          <button class="button primary" type="button" data-upload>
+            Pilih gambar
+          </button>
+          <p class="file-limits">JPG / PNG · Maks. 3 MB · 2048 × 2048 piksel</p>
+        </div>
+        <figure id="beforePane" hidden>
+          <figcaption>Sebelum · Asli</figcaption>
+          <img id="imagePreview" alt="Gambar asli yang diunggah" hidden />
+        </figure>
+        <figure id="afterPane" hidden>
+          <figcaption id="afterLabel">Sesudah</figcaption>
+          <img id="resultPreview" alt="Hasil pengolahan gambar" />
+        </figure>
+      </div>
+      <div class="preview-caption">
+        <span id="fileName">Belum ada gambar</span
+        ><span id="imageDetails"></span>
+      </div>
+      <div class="result-actions">
+        <p id="photoFixStatus" class="analysis-status" role="status"></p>
+        <p id="appliedSettings" class="analysis-note" hidden></p>
+        <a id="downloadResult" class="button primary" download hidden
+          >Download hasil</a
+        >
+      </div>
+    </section>
+    <aside class="analysis-panel" aria-labelledby="analysisTitle">
+      <div class="panel-heading">
+        <h2 id="analysisTitle">Pemeriksaan kualitas</h2>
+      </div>
+      <div class="analysis-body">
+        <p id="uploadStatus" class="analysis-status" role="status">
+          Hasil analisis akan muncul setelah kamu memilih gambar.
+        </p>
+        <button
+          id="retryAnalysis"
+          class="button secondary"
+          type="button"
+          hidden
+        >
+          Coba analisis lagi
+        </button>
+        <div id="qualityReport" hidden>
+          <dl class="quality-metrics">
+            <div>
+              <dt>Kecerahan <span>Rata-rata intensitas · 0–255</span></dt>
+              <dd>
+                <strong id="brightnessValue"></strong
+                ><span id="brightnessStatus" class="metric-status"></span>
+              </dd>
+            </div>
+            <div>
+              <dt>Kontras <span>Simpangan baku intensitas</span></dt>
+              <dd>
+                <strong id="contrastValue"></strong
+                ><span id="contrastStatus" class="metric-status"></span>
+              </dd>
+            </div>
+            <div>
+              <dt>Ketajaman <span>Variansi Laplacian</span></dt>
+              <dd>
+                <strong id="sharpnessValue"></strong
+                ><span id="sharpnessStatus" class="metric-status"></span>
+              </dd>
+            </div>
+          </dl>
+          <p class="analysis-note">
+            Nilai ketajaman bergantung pada detail dalam gambar.
+          </p>
+          <div class="recommendations">
+            <h3>Rekomendasi untuk gambarmu</h3>
+            <ul id="recommendationList"></ul>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+  <section class="photo-fix" aria-labelledby="photoFixTitle">
+    <div class="photo-fix-intro">
+      <h2 id="photoFixTitle">PhotoFix</h2>
+      <p>Sesuaikan pencahayaan, kontras, dan ketajaman foto.</p>
+    </div>
+    <div class="photo-fix-workspace">
+      <fieldset id="photoFixControls" disabled>
+        <legend class="visually-hidden">Pengaturan PhotoFix</legend>
+        <div class="auto-fix-row">
+          <div>
+            <h3>Auto Fix</h3>
+            <p>
+              Biarkan hasil analisis menentukan gamma, kontras, dan penajaman.
+            </p>
+          </div>
+          <button id="autoFix" class="button primary" type="button">
+            Jalankan Auto Fix
+          </button>
+        </div>
+        <details class="manual-fix">
+          <summary>Manual Fix</summary>
+          <form id="manualFixForm">
+            <div class="manual-fields">
+              <label for="intensityMethod"
+                >Transformasi intensitas<select id="intensityMethod">
+                  <option value="gamma">Gamma Transformation</option>
+                  <option value="log">Logarithmic Transformation</option>
+                </select></label
+              >
+              <label for="gammaInput"
+                >Gamma <output id="gammaOutput" for="gammaInput">1</output
+                ><input
+                  id="gammaInput"
+                  type="range"
+                  min="0.3"
+                  max="3"
+                  step="0.05"
+                  value="1"
+                  aria-describedby="gammaHelp"
+                /><span id="gammaHelp" class="field-help"
+                  >1 = netral. Di atas 1 lebih terang, di bawah 1 lebih
+                  gelap.</span
+                ></label
+              >
+              <label for="sharpenInput"
+                >Sharpening
+                <output id="sharpenOutput" for="sharpenInput">0</output
+                ><input
+                  id="sharpenInput"
+                  type="range"
+                  min="0"
+                  max="2"
+                  step="0.1"
+                  value="0"
+                /><span class="field-help"
+                  >0 = tanpa penajaman. Nilai tinggi dapat mempertegas
+                  noise.</span
+                ></label
+              >
+              <label class="checkbox-field" for="stretchInput"
+                ><input id="stretchInput" type="checkbox" />Contrast
+                stretching</label
+              >
+            </div>
+            <p id="logHelp" class="analysis-note" hidden>
+              Mengangkat area gelap. Pengaturan gamma tidak digunakan.
+            </p>
+            <div class="fix-actions">
+              <button id="manualFix" class="button primary" type="submit">
+                Terapkan Manual Fix</button
+              ><button id="resetFix" class="button secondary" type="button">
+                Reset ke asli
+              </button>
+            </div>
+          </form>
+        </details>
+      </fieldset>
+    </div>
+  </section>
+  <section class="photo-fix" aria-labelledby="docuClearTitle">
+    <div class="photo-fix-intro">
+      <h2 id="docuClearTitle">DocuClear</h2>
+      <p>Perjelas tulisan pada foto dokumen dan catatan.</p>
+    </div>
+    <div class="photo-fix-workspace">
+      <fieldset id="docuClearControls" disabled>
+        <legend class="visually-hidden">Pengaturan DocuClear</legend>
+        <form id="docuClearForm">
+          <div class="manual-fields">
+            <label for="documentMode"
+              >Hasil dokumen<select id="documentMode">
+                <option value="binary">Hitam-putih · Perjelas tulisan</option>
+                <option value="grayscale">
+                  Grayscale · Pertahankan gradasi
+                </option></select
+              ><span class="field-help"
+                >Hitam-putih menyesuaikan ambang pada area lokal untuk
+                pencahayaan yang tidak merata.</span
+              ></label
+            >
+            <label class="checkbox-field" for="documentDenoise"
+              ><input id="documentDenoise" type="checkbox" />Kurangi noise<span
+                class="field-help"
+                >Filter median dapat mengurangi bintik. Biarkan nonaktif jika
+                tulisan sangat tipis.</span
+              ></label
+            >
+          </div>
+          <div class="fix-actions">
+            <button id="applyDocuClear" class="button primary" type="submit">
+              Terapkan DocuClear</button
+            ><button id="resetDocument" class="button secondary" type="button">
+              Reset ke asli
+            </button>
+          </div>
+        </form>
+      </fieldset>
+    </div>
+  </section>
+  <section class="photo-fix" aria-labelledby="stencilTitle">
+    <div class="photo-fix-intro">
+      <h2 id="stencilTitle">StencilMaker</h2>
+      <p>Ubah gambar menjadi stencil hitam-putih.</p>
+    </div>
+    <div class="photo-fix-workspace">
+      <fieldset id="stencilControls" disabled>
+        <legend class="visually-hidden">Pengaturan StencilMaker</legend>
+        <form id="stencilForm">
+          <div class="manual-fields">
+            <label for="thresholdInput"
+              >Threshold
+              <output id="thresholdOutput" for="thresholdInput">128</output
+              ><input
+                id="thresholdInput"
+                type="range"
+                min="0"
+                max="255"
+                step="1"
+                value="128"
+                aria-describedby="thresholdHelp"
+              /><span id="thresholdHelp" class="field-help"
+                >Nilai lebih tinggi membuat lebih banyak area menjadi hitam
+                sebelum efek negatif.</span
+              ></label
+            >
+            <label class="checkbox-field" for="negativeInput"
+              ><input id="negativeInput" type="checkbox" />Negatif<span
+                class="field-help"
+                >Tukar area hitam dan putih.</span
+              ></label
+            >
+          </div>
+          <div class="fix-actions">
+            <button id="applyStencil" class="button primary" type="submit">
+              Buat stencil</button
+            ><button id="resetStencil" class="button secondary" type="button">
+              Reset ke asli
+            </button>
+          </div>
+        </form>
+      </fieldset>
+    </div>
+  </section>
+</section>
